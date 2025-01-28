@@ -4,6 +4,7 @@ import CameraComponent from '../components/CameraComponent';
 import * as Print from 'expo-print';
 import * as MediaLibrary from 'expo-media-library';
 import * as Sharing from 'expo-sharing';
+import { FontAwesome } from '@expo/vector-icons';
 
 interface PhotoData {
   uri: string;
@@ -117,8 +118,13 @@ const MainScreen: React.FC = () => {
         <CameraComponent onPhotoTaken={(photo,) => {
           setPhotos((prevPhotos) => [...prevPhotos, photo]);
         }} />
-        <Button title="Gerar PDF" onPress={() => generatePdf(photos[photos.length - 1])} />
+
       </ScrollView>
+      <View style={styles.pdf}>
+        <FontAwesome style={styles.icon} name="file-pdf-o" size={48} color="red" onPress={() => generatePdf(photos[photos.length - 1])} />
+
+      </View>
+
     </View>
   );
 };
@@ -127,6 +133,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+  },
+  icon: {
+    position: 'relative',
+    bottom: 20,
+  },
+  pdf: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    bottom: 20,
   },
 });
 
