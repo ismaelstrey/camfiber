@@ -5,7 +5,7 @@ import { SafeAreaView, StyleSheet } from 'react-native';
 
 const App: React.FC = () => {
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} >
       <MainScreen />
     </SafeAreaView>
   );

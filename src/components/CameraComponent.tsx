@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Button, Image, StyleSheet, Text } from 'react-native';
+import { View, Button, Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
+import { FontAwesome } from '@expo/vector-icons';
 
 interface PhotoData {
     uri: string;
@@ -14,6 +15,7 @@ interface PhotoData {
 
 const CameraComponent: React.FC<{ onPhotoTaken: (photo: PhotoData) => void }> = ({ onPhotoTaken }) => {
     const [photo, setPhoto] = useState<PhotoData | null>(null);
+    const [images, setImages] = useState<string[]>([]);
     const takePhoto = async () => {
         const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
         if (cameraStatus !== 'granted') {
@@ -41,6 +43,10 @@ const CameraComponent: React.FC<{ onPhotoTaken: (photo: PhotoData) => void }> = 
         if (!result.canceled && result.assets[0].uri) {
             const uri = result.assets[0].uri;
             const base64 = result.assets[0].base64 || '';
+            if (base64) {
+                setImages(prevImages => [...prevImages, base64]);
+            }
+
             const location = await Location.getCurrentPositionAsync({});
             const { latitude, longitude } = location.coords;
             const address = await getAddressFromCoords(latitude, longitude);
@@ -56,6 +62,7 @@ const CameraComponent: React.FC<{ onPhotoTaken: (photo: PhotoData) => void }> = 
 
             setPhoto(photoData);
             onPhotoTaken(photoData);
+
         } else {
             alert('A foto não foi tirada.');
         }
@@ -77,14 +84,20 @@ const CameraComponent: React.FC<{ onPhotoTaken: (photo: PhotoData) => void }> = 
 
     return (
         <View style={styles.container}>
-            <Button title="Tirar Foto" onPress={takePhoto} />
+            <FontAwesome style={styles.icon} name="camera" size={48} color="black" onPress={takePhoto} />
+
             <Text style={styles.text}>{photo ? 'Foto tirada!' : 'Nenhuma foto tirada.'}</Text>
             <Text style={styles.text}>{photo ? 'Endereço: ' + photo.address : ''}</Text>
             <Text style={styles.text}>{photo ? 'Data e hora: ' + photo.timestamp : ''}</Text>
             <Text style={styles.text}>{photo ? 'Latitude: ' + photo.latitude : ''}</Text>
             <Text style={styles.text}>{photo ? 'Longitude: ' + photo.longitude : ''}</Text>
 
-            {photo && <Image source={{ uri: photo.uri }} style={styles.image} />}
+            {/* {photo && <Image source={{ uri: photo.uri }} style={styles.image} />} */}
+            {images && images.map((image, index) => (
+                <TouchableOpacity key={index} onPress={() => setImages(prevImages => prevImages.filter((_, i) => i !== index))}>
+                    <Image key={index} source={{ uri: 'data:image/jpeg;base64,' + image }} style={styles.image} />
+                </TouchableOpacity>
+            ))}
 
         </View>
     );
@@ -103,6 +116,10 @@ const styles = StyleSheet.create({
     },
     text: {
         fontSize: 20
+    }, icon: {
+        position: 'absolute',
+        top: 50,
+
     }
 });
 
